@@ -1,0 +1,7 @@
+- [ ] Setup design tokens in `app/globals.css`
+- [ ] Create `components/UploadZone.js`
+- [ ] Create `components/StatusTracker.js`
+- [ ] Create `components/ResultsDisplay.js`
+- [ ] Implement state management and polling in `app/page.js`
+- [ ] Add animations and final polish
+- [ ] Verify functionality
