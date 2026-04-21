@@ -164,7 +164,7 @@ export default function Home() {
                 <h2 className="main-title">AI Powered <br /><span className="text-gradient">Violation Detection</span></h2>
                 <p className="sub-title">Deploy state-of-the-art  to analyze traffic feeds, identify seatbelt violations, and extract license plates with surgical precision.</p>
                 
-                <div className="metrics-row">
+                {/* <div className="metrics-row">
                   <div className="metric">
                     <Sparkles size={16} />
                     <span>99.9% Accuracy</span>
@@ -173,7 +173,7 @@ export default function Home() {
                     <Globe size={16} />
                     <span>Real-time Link</span>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               <div className="upload-wrapper">

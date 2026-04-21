@@ -47,6 +47,7 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   transition: var(--transition-slow);
+  margin-top: 73px;
 }
 
 .glass-card:hover {
