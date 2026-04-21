@@ -8,7 +8,7 @@ import UploadZone from '@/components/UploadZone'
 import StatusTracker from '@/components/StatusTracker'
 import ResultsDisplay from '@/components/ResultsDisplay'
 
-const API_BASE = 'http://192.168.0.104:7860'
+const API_BASE = 'https://michealhat-detection-seatbelt.hf.space'
 
 export default function Home() {
   const [jobId, setJobId] = useState(null)
