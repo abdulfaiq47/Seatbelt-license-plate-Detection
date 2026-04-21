@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
 import { ShieldAlert, User, CreditCard, ChevronRight, Activity, Database, Check, Cloud } from 'lucide-react'
 
-export default function ResultsDisplay({ results, videoUrl, downloadUrl }) {
+const API_BASE = 'http://192.168.0.104:7860'
+
+export default function ResultsDisplay({ results, videoUrl, downloadUrl, jobId }) {
   if (!results) return null
 
   const isObject = !Array.isArray(results)
@@ -131,6 +133,28 @@ export default function ResultsDisplay({ results, videoUrl, downloadUrl }) {
             >
               Download Result Video
             </a>
+            <a
+              href={`${API_BASE}/csv/${jobId}`}
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              className="action-btn secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                textDecoration: 'none',
+                background: 'var(--bg-deep)',
+                border: '1px solid var(--glass-border)',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '8px',
+                color: '#FFF',
+                fontWeight: 800,
+                fontSize: '0.85rem'
+              }}
+            >
+              Download CSV Data
+            </a>
             <div style={{ flex: 1, wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '0.65rem', background: 'rgba(0,0,0,0.3)', padding: '0.75rem', borderRadius: '8px', color: 'var(--text-muted)' }}>
               {downloadUrl || videoUrl}
             </div>
@@ -149,6 +173,7 @@ export default function ResultsDisplay({ results, videoUrl, downloadUrl }) {
         }
 
         @media (max-width: 1100px) { .results-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .results-grid { gap: 1rem; } }
 
         .media-viewer {
           padding: 1.5rem;
@@ -157,10 +182,18 @@ export default function ResultsDisplay({ results, videoUrl, downloadUrl }) {
           gap: 1.5rem;
         }
 
+        @media (max-width: 768px) {
+          .media-viewer { padding: 1rem; }
+        }
+
         .header-bar {
           display: flex;
           justify-content: space-between;
           align-items: center;
+        }
+
+        @media (max-width: 768px) {
+          .header-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
         }
 
         .status-indicator {
@@ -226,6 +259,10 @@ export default function ResultsDisplay({ results, videoUrl, downloadUrl }) {
 
         .stats-header { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
+        @media (max-width: 480px) {
+          .stats-header { grid-template-columns: 1fr; }
+        }
+
         .stat-box {
           padding: 1.25rem;
           display: flex;
@@ -233,21 +270,20 @@ export default function ResultsDisplay({ results, videoUrl, downloadUrl }) {
           gap: 1rem;
         }
 
-        .stat-box.danger { border-color: rgba(244, 63, 94, 0.3); }
-        .stat-box.danger .stat-icon { color: var(--accent); }
-        .stat-box.primary .stat-icon { color: var(--primary); }
-
-        .stat-info .label { 
-          display: block; 
-          font-size: 0.6rem; 
-          color: var(--text-muted); 
-          font-weight: 700;
-          text-transform: uppercase;
+        @media (max-width: 480px) {
+          .stat-box { padding: 1rem; gap: 0.75rem; }
+          .stat-info .value { font-size: 1.25rem; }
         }
 
-        .stat-info .value { font-size: 1.75rem; font-weight: 800; color: #FFF; }
-
         .log-area { display: flex; flex-direction: column; height: 450px; }
+
+        @media (max-width: 768px) {
+          .log-area { height: 350px; }
+        }
+
+        @media (max-width: 480px) {
+          .log-area { height: 300px; }
+        }
 
         .log-header {
           padding: 1.5rem;

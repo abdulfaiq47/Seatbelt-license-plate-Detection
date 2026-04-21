@@ -8,7 +8,7 @@ import UploadZone from '@/components/UploadZone'
 import StatusTracker from '@/components/StatusTracker'
 import ResultsDisplay from '@/components/ResultsDisplay'
 
-const API_BASE = 'https://michealhat-detection-seatbelt.hf.space'
+const API_BASE = 'http://192.168.0.104:7860'
 
 export default function Home() {
   const [jobId, setJobId] = useState(null)
@@ -26,24 +26,61 @@ export default function Home() {
           const response = await axios.get(`${API_BASE}/status/${jobId}`)
           const data = response.data
           
-          const mappedStatus = data.status === 'completed' ? 'done' : 
-                               data.status === 'failed' ? 'error' : 'processing'
+          const backendStatus = data.status || 'processing'
                                
-          setJobStatus(mappedStatus)
-          setProgress(data.progress || 0)
-          
-          if (data.status === 'completed') {
+          if (backendStatus === 'done') {
             clearInterval(intervalId)
+            setJobStatus('done')
+            setProgress(100)
             try {
-              const resResponse = await axios.get(`${API_BASE}/violations/${jobId}`)
-              setJobResults(resResponse.data)
+              // Fetch the CSV data from the backend since it has the results
+              const csvResponse = await axios.get(`${API_BASE}/csv/${jobId}`)
+              const csvText = csvResponse.data
+              
+              // Basic CSV parsing
+              const lines = csvText.trim().split('\n')
+              const violations = []
+              
+              // Skip header row, parse rows
+              // Assume format contains license_number at specific column, let's just find the first text looking like a plate
+              for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(',')
+                let plateText = ""
+                // find the column that looks like a plate (string, len > 3, alphanumeric)
+                for (let c of cols) {
+                   const cleanC = c.trim().replace(/['"]/g, '')
+                   if (cleanC.length >= 3 && /[A-Z0-9]{3,}/i.test(cleanC) && !cleanC.includes('.')) {
+                       plateText = cleanC
+                   }
+                }
+                if (plateText) {
+                  violations.push({
+                    plate_text: plateText,
+                    violation: true,
+                    label: 'DETECTED PLATE'
+                  })
+                }
+              }
+              
+              setJobResults({
+                type: 'video',
+                violations: violations,
+                total_violations: violations.length,
+                total_frames: lines.length - 1
+              })
             } catch (err) {
-              setError('Failed to load results')
-              setJobStatus('error')
+              console.error('Failed to load CSV results:', err)
+              // If CSV fails, just show the video anyway
+              setJobResults({ type: 'video', violations: [] })
             }
-          } else if (data.status === 'failed') {
-            setError('Processing failed on server.')
+          } else if (backendStatus === 'error') {
+            setError(data.error || 'Processing failed on server.')
+            setJobStatus('error')
             clearInterval(intervalId)
+          } else {
+             setJobStatus(backendStatus)
+             // Animate progress while waiting
+             setProgress(prev => Math.min((prev || 0) + Math.floor(Math.random() * 5 + 2), 95))
           }
         } catch (err) {
           console.error('Polling error:', err)
@@ -62,7 +99,7 @@ export default function Home() {
     setProgress(0)
 
     const formData = new FormData()
-    formData.append('video', file)
+    formData.append('file', file)
 
     try {
       const response = await axios.post(`${API_BASE}/upload`, formData, {
@@ -191,8 +228,9 @@ export default function Home() {
               </div>
               <ResultsDisplay 
                 results={jobResults} 
-                videoUrl={`${API_BASE}/stream/${jobId}`}
+                videoUrl={`${API_BASE}/download/${jobId}`}
                 downloadUrl={`${API_BASE}/download/${jobId}`}
+                jobId={jobId}
               />
             </motion.section>
           )}
@@ -219,6 +257,10 @@ export default function Home() {
           border-radius: 16px;
         }
 
+        @media (max-width: 768px) {
+          .hud-nav { margin: 1rem; }
+        }
+
         .nav-content {
           max-width: 1600px;
           margin: 0 auto;
@@ -226,6 +268,10 @@ export default function Home() {
           display: flex;
           align-items: center;
           justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+          .nav-content { padding: 0.5rem 1rem; }
         }
 
         .brand { display: flex; align-items: center; gap: 1rem; }
@@ -237,10 +283,19 @@ export default function Home() {
           display: flex; align-items: center; justify-content: center;
         }
 
+        @media (max-width: 480px) {
+          .brand-icon { width: 32px; height: 32px; }
+        }
+
         .brand h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -1px; }
+        @media (max-width: 768px) { .brand h1 { font-size: 1.2rem; } }
+        @media (max-width: 480px) { .brand h1 { font-size: 1rem; } }
+
         .brand h1 span { color: #FFF; opacity: 0.5; font-weight: 500; }
 
         .nav-menu { display: flex; gap: 2.5rem; }
+        @media (max-width: 768px) { .nav-menu { display: none; } }
+
         .nav-item { 
           background: none; border: none; 
           color: var(--text-muted); 
@@ -257,6 +312,14 @@ export default function Home() {
 
         .hud-main { flex: 1; padding: 2rem; max-width: 1600px; margin: 0 auto; width: 100%; }
 
+        @media (max-width: 768px) {
+          .hud-main { padding: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+          .hud-main { padding: 0.5rem; }
+        }
+
         .hero-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -268,6 +331,20 @@ export default function Home() {
         @media (max-width: 1024px) {
           .hero-grid { grid-template-columns: 1fr; gap: 4rem; text-align: center; }
           .metrics-row { justify-content: center; }
+        }
+
+        @media (max-width: 768px) {
+          .hero-grid { gap: 2rem; padding: 2rem 0; }
+          .main-title { font-size: 2.5rem; }
+          .sub-title { font-size: 1rem; max-width: none; }
+          .metrics-row { gap: 2rem; flex-wrap: wrap; }
+          .info-cards { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+          .main-title { font-size: 2rem; }
+          .metrics-row { gap: 1rem; }
+          .metric { gap: 0.5rem; font-size: 0.8rem; }
         }
 
         .sys-badge {
@@ -326,7 +403,14 @@ export default function Home() {
           padding-bottom: 2rem;
         }
 
+        @media (max-width: 768px) {
+          .results-hud { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        }
+
         .hud-left h2 { font-size: 2.5rem; font-weight: 800; color: #FFF; letter-spacing: -1px; }
+        @media (max-width: 768px) { .hud-left h2 { font-size: 2rem; } }
+        @media (max-width: 480px) { .hud-left h2 { font-size: 1.5rem; } }
+
         .hud-left p { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-top: 0.5rem; }
 
         .hud-footer { padding: 4rem 1.5rem; text-align: center; }

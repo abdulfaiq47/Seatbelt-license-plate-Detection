@@ -110,17 +110,26 @@ export default function UploadZone({ onUpload, isUploading }) {
         </AnimatePresence>
       </motion.div>
 
-      {selectedFile && !isUploading && (
+      {selectedFile && (
         <motion.button
+          type="button"
           className="analysis-btn"
           onClick={handleUploadClick}
+          disabled={isUploading}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: isUploading ? 1 : 1.02 }}
+          whileTap={{ scale: isUploading ? 1 : 0.95 }}
+          style={{ opacity: isUploading ? 0.7 : 1, cursor: isUploading ? 'not-allowed' : 'pointer' }}
         >
-          <ScanLine size={18} />
-          <span>Execute Neural Analysis</span>
+          {isUploading ? (
+            <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeDasharray="31.415, 31.415" className="opacity-25" />
+            </svg>
+          ) : (
+            <ScanLine size={18} />
+          )}
+          <span>{isUploading ? 'Executing Analysis...' : 'Execute Neural Analysis'}</span>
         </motion.button>
       )}
 
@@ -304,6 +313,15 @@ export default function UploadZone({ onUpload, isUploading }) {
         }
 
         .clear-btn:hover:not(:disabled) { background: var(--accent); }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+          animation: spin 1s linear infinite;
+        }
       `}</style>
     </div>
   )
