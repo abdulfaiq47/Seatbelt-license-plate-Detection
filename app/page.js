@@ -157,10 +157,7 @@ export default function Home() {
               exit={{ opacity: 0, scale: 0.95 }}
             >
               <div className="hero-content">
-                <div className="sys-badge">
-                  <Zap size={12} />
-                  <span>CORE v4.2.0 ONLINE</span>
-                </div>
+                
                 <h2 className="main-title">AI Powered <br /><span className="text-gradient">Violation Detection</span></h2>
                 <p className="sub-title">Deploy state-of-the-art  to analyze traffic feeds, identify seatbelt violations, and extract license plates with surgical precision.</p>
                 
