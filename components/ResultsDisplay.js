@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { ShieldAlert, User, CreditCard, ChevronRight, Activity, Database, Check, Cloud } from 'lucide-react'
 
-const API_BASE = 'http://192.168.0.104:7860'
+const API_BASE = 'https://michealhat-detection-seatbelt.hf.space'
 
 export default function ResultsDisplay({ results, videoUrl, downloadUrl, jobId }) {
   if (!results) return null
